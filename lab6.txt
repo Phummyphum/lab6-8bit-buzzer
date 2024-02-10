@@ -1,0 +1,118 @@
+#define BUTTON 2
+#define BUZZER 23
+
+#define A5 880
+#define B5 988
+#define C5 523
+#define E5 659
+#define F5 698
+#define G5 784
+#define C6 1047
+#define D6 1175
+
+hw_timer_t *timer = NULL;
+
+bool buttonPressed = false;
+volatile int tempsIn = 2;
+const float speed[] = {0.25, 0.5, 1, 2, 4}; 
+
+void playmelody(int note, double duration) {
+   if (buttonPressed) {
+    if (digitalRead(BUTTON) == LOW) {
+      tempsIn = (tempsIn + 1) % 5; 
+      Serial.println(tempsIn);
+    }
+    buttonPressed = false;
+  }
+  int per = 500000 / note;
+  timerAlarmWrite(timer, per, true);
+  timerAlarmEnable(timer);
+  delay(duration * speed[tempsIn]);
+  timerAlarmDisable(timer);
+}
+
+void IRAM_ATTR setspeed() {
+  if (!buttonPressed && digitalRead(BUTTON)==HIGH) {
+    buttonPressed = true;
+  }
+}
+
+void IRAM_ATTR onTimer() {
+  digitalWrite(BUZZER, !digitalRead(BUZZER));
+}
+
+void play_delay(int duration) {
+  digitalWrite(BUZZER, LOW);
+  delay(duration);
+}
+
+void play_song() {
+  playmelody(E5, 500);  //Old
+  delay(25);
+  playmelody(G5, 250);  //Mc
+  delay(25);
+  playmelody(C5, 1000);  //do
+  delay(25);
+  playmelody(A5, 500);  //nald
+  delay(25);
+  playmelody(C6, 250);  //had
+  delay(25);
+  playmelody(F5, 1000);  //a
+  delay(25);
+  playmelody(B5, 250);  //farm
+  delay(25);
+  playmelody(B5, 250);  //E-I-E-I-O
+  delay(25);
+  playmelody(C6, 250);
+  delay(25);
+  playmelody(D6, 250);
+  delay(25);
+  playmelody(C6, 250);
+  delay(1000);
+
+
+
+  playmelody(E5, 500);  //Old
+  delay(25);
+  playmelody(G5, 250);  //Mc
+  delay(25);
+  playmelody(C5, 1000);  //do
+  delay(25);
+  playmelody(A5, 500);  //nald
+  delay(25);
+  playmelody(C6, 250);  //had
+  delay(25);
+  playmelody(F5, 1000);  //a
+  delay(25);
+  playmelody(A5, 250);  //Old
+  delay(25);
+  playmelody(B5, 250);  //Mc
+  delay(25);
+  playmelody(G5, 250);  //do
+  delay(25);
+  playmelody(A5, 250);  //nald
+  delay(25);
+  playmelody(B5, 250);  //had
+  delay(25);
+  playmelody(D6, 250);  //a
+  delay(25);
+  playmelody(C6, 250);  //farm
+  // delay(25);
+  delay(1000);
+}
+
+void setup() {
+  pinMode(BUTTON, INPUT);
+  attachInterrupt(BUTTON, setspeed, RISING);
+
+  pinMode(BUZZER, OUTPUT);
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &onTimer, true);
+}
+
+void loop() {
+ 
+  play_song();
+  digitalWrite(BUZZER, LOW);
+  // delay(2000);
+}
